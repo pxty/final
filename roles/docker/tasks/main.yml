@@ -4,6 +4,17 @@
     name: docker.io
     state: present
 
+- name: Install pip3
+  package:
+    update_cache: yes
+    name: python3-pip
+    state: latest
+
+- name: Install Docker SDK
+  pip:
+    name: docker
+    executable: pip3
+
 - name: Create directory
   file:
     path: /opt/docker
