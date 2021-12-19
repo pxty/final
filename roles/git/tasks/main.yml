@@ -1,0 +1,22 @@
+---
+- name: Update packages to latest  
+  apt: 
+    name: "*"
+    state: latest
+
+- name: Install git
+  apt:
+    name: git
+    state: present
+
+- name: Set user.email into the gitconfig 
+  community.general.git_config:
+    name: user.mail
+    scope: global
+    value: "mlenkovets@mail.ru"
+
+- name: Set user.name into the gitconfig
+  community.general.git_config:
+    name: user.name
+    scope: global
+    value: "Marina"
