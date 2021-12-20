@@ -1,9 +1,15 @@
 ---
-- name: Install docker
+- name: Install app in the docker
   hosts: app
   become: yes
 
+  vars:
+    FLASK_APP: webapp
+    SECRET_KEY: sdsfsfsfdsfxcx
+    ALLOWED_KEYS: user|1234
+    UPLOAD_FOLDER: /files
+    ALLOWED_EXTENSIONS: txt|pdf|png|jpg|jpeg|gif|csv
+    OWNER: marina
   roles:
     - docker
     - git
-    - flaskapp

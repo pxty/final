@@ -19,3 +19,35 @@
   file:
     path: /opt/docker
     state: directory
+
+- name: Create the directory for upload
+  file:
+    path: /home/{{ OWNER }}/files
+    state: directory
+
+- name: Clone github repository
+  ansible.builtin.git:
+    repo: https://github.com/pxty/flaskapp
+    dest: /home/{{ OWNER }}/flaskapp
+    clone: yes
+    update: yes
+
+- name: Write .env
+  ansible.builtin.template:
+    src: ./templates/env.j2
+    dest: /home/{{ OWNER }}/flaskapp/.env
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Build image flaskapp
+  community.docker.docker_image:
+    name: flaskapp:exam
+    build:
+      path: /home/{{ OWNER }}/flaskapp
+    source: build
+    state: present
+
+- name: Run image and mount the volume
+  command: docker run --name flaskapp -d -p 5000:5000 --mount type=bind,source=/home/{{ OWNER }}/files,target=/files flaskapp:exam
+  become: yes 
