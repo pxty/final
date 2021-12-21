@@ -1,0 +1,56 @@
+---
+- name: Install nginx
+  ansible.builtin.apt:
+    name: nginx
+    update_cache: yes
+    state: present
+
+- name: Write config
+  ansible.builtin.copy:
+    src: ./files/nginx.conf
+    dest: /etc/nginx/sites-available/nginx.conf
+    force: yes
+    backup: yes
+
+- name: Clear
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled
+    state: absent
+
+- name: Create directory
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled
+    state: directory
+
+- name: symlink on nginx.conf
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/nginx.conf
+    dest: /etc/nginx/sites-enabled/nginx.conf
+    force: yes
+    state: link
+
+- name: Copy Dockerfile
+  ansible.builtin.copy:
+    src: ./files/Dockerfile
+    dest: /etc/nginx
+    force: yes
+    backup: yes
+
+
+- name: Build nginx docker container
+  community.docker.docker_image:
+    build:
+      path: /etc/nginx
+    name: nginx
+    tag: v1
+    source: build
+
+- name: Run nginx docker container
+  docker_container: 
+    name: nginx
+    image: nginx:v1
+    state: started
+    published_ports: "8080:80"
+    exposed_ports: 8080
+    networks:
+      - name: flaskapp

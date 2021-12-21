@@ -11,5 +11,6 @@
     ALLOWED_EXTENSIONS: txt|pdf|png|jpg|jpeg|gif|csv
     OWNER: marina
   roles:
-    - docker
     - git
+    - docker      
+    - nginx

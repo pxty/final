@@ -48,6 +48,24 @@
     source: build
     state: present
 
-- name: Run image and mount the volume
-  command: docker run --name flaskapp -d -p 5000:5000 --mount type=bind,source=/home/{{ OWNER }}/files,target=/files flaskapp:exam
-  become: yes 
+- name: Create the network
+  community.docker.docker_network:
+    name: flaskapp
+
+- name: Run flaskapp1
+  docker_container:
+    name: flaskapp1
+    image: flaskapp:exam
+    state: started
+    exposed_ports: 5000
+    networks:
+      - name: flaskapp
+
+- name: Run flaskapp2
+  docker_container:
+    name: flaskapp2
+    image: flaskapp:exam
+    state: started
+    exposed_ports: 5000
+    networks:
+      - name: flaskapp
