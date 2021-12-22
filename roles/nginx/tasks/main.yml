@@ -1,56 +1,54 @@
 ---
-- name: Install nginx
-  ansible.builtin.apt:
-    name: nginx
-    update_cache: yes
+- name: Install docker from repository
+  apt:
+    name: docker.io
     state: present
 
-- name: Write config
-  ansible.builtin.copy:
-    src: ./files/nginx.conf
-    dest: /etc/nginx/sites-available/nginx.conf
-    force: yes
-    backup: yes
+- name: Install pip3
+  package:
+    update_cache: yes
+    name: python3-pip
+    state: latest
 
-- name: Clear
-  ansible.builtin.file:
-    path: /etc/nginx/sites-enabled
-    state: absent
+- name: Install docker SDK for python
+  pip:
+    name: docker
+    executable: pip3
 
-- name: Create directory
-  ansible.builtin.file:
-    path: /etc/nginx/sites-enabled
-    state: directory
+- name: Create directory for project
+  file: path=/opt/docker state=directory
 
-- name: symlink on nginx.conf
-  ansible.builtin.file:
-    src: /etc/nginx/sites-available/nginx.conf
-    dest: /etc/nginx/sites-enabled/nginx.conf
-    force: yes
-    state: link
+- name: Copy NGINX Dockerfile
+  copy:
+    src: /home/{{ OWNER }}/final/roles/nginx/files/Dockerfile
+    dest: /opt/docker/nginx
+    mode: 0755
+    owner: root
+    group: root
 
-- name: Copy Dockerfile
-  ansible.builtin.copy:
-    src: ./files/Dockerfile
-    dest: /etc/nginx
-    force: yes
-    backup: yes
+- name: Copy NGINX config
+  copy:
+    src: /home/{{ OWNER }}/final/roles/nginx/files/nginx.conf
+    dest: /opt/docker/nginx
+    mode: 0755
+    owner: root
+    group: root
 
-
-- name: Build nginx docker container
+- name: Build NGINX docker
   community.docker.docker_image:
     build:
-      path: /etc/nginx
+      path: /opt/docker/nginx 
     name: nginx
-    tag: v1
+    tag: v2
     source: build
 
-- name: Run nginx docker container
-  docker_container: 
+- name: Run NGINX
+  docker_container:
     name: nginx
-    image: nginx:v1
+    image: nginx:v2
     state: started
-    published_ports: "8080:80"
-    exposed_ports: 8080
+    published_ports: "80:80"
+    exposed_ports: 80
     networks:
       - name: flaskapp
+
